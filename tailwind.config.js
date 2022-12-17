@@ -15,6 +15,10 @@ module.exports = {
     fontFamily: {
       sans: ["Graphik", "sans-serif"],
       serif: ["Merriweather", "serif"],
+      mono: ["ui-monospace", "SFMono-Regular"],
+      display: ["Oswald"],
+      body: ['"Open Sans"'],
+      "finger-paint": ["'Finger Paint', cursive"],
     },
     extend: {
       spacing: {

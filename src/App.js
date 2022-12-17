@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 function App() {
   const [player, setPlayer] = useState("X");
   const [winner, setWinner] = useState(null);
-  const [playsLeft, setplaysLeft] = useState(9);
   const [board, setBoard] = useState(["", "", "", "", "", "", "", "", ""]);
 
   /**
@@ -15,44 +14,9 @@ function App() {
    */
   const handleBoxSelect = (index) => {
     if (board[index] !== "" || winner !== null) return;
-    setplaysLeft((prev) => prev - 1);
     setBoard((prev) => prev.map((item, i) => (i === index && !item ? player : item)));
     player === "X" ? setPlayer("O") : setPlayer("X");
   };
-
-  useEffect(() => {
-    /**
-     * If there are still plays left and there is no winner, check if any of the winning combinations
-     * have been played. If so, set the winner to the player who played that combination. If there are
-     * no plays left and there is no winner, set the winner to "Draw"
-     */
-    const checkWinner = () => {
-      if (playsLeft > 0 && winner === null) {
-        if (board[0] === board[1] && board[1] === board[2] && board[0] !== "") {
-          setWinner(board[0]);
-        } else if (board[0] === board[3] && board[3] === board[6] && board[0] !== "") {
-          setWinner(board[0]);
-        } else if (board[0] === board[4] && board[4] === board[8] && board[0] !== "") {
-          setWinner(board[0]);
-        } else if (board[1] === board[4] && board[4] === board[7] && board[1] !== "") {
-          setWinner(board[1]);
-        } else if (board[2] === board[5] && board[5] === board[8] && board[2] !== "") {
-          setWinner(board[2]);
-        } else if (board[2] === board[4] && board[4] === board[6] && board[2] !== "") {
-          setWinner(board[2]);
-        } else if (board[3] === board[4] && board[4] === board[5] && board[3] !== "") {
-          setWinner(board[3]);
-        } else if (board[6] === board[7] && board[7] === board[8] && board[6] !== "") {
-          setWinner(board[6]);
-        } else {
-          setWinner(null);
-        }
-      } else if (playsLeft === 0 && winner === null) {
-        setWinner("Draw");
-      }
-    };
-    checkWinner();
-  }, [playsLeft, board, player, winner]);
 
   /**
    * It resets the state of the game to its initial state
@@ -60,25 +24,69 @@ function App() {
   const handleReset = () => {
     setPlayer("X");
     setWinner(null);
-    setplaysLeft(9);
     setBoard(["", "", "", "", "", "", "", "", ""]);
   };
 
+  useEffect(() => {
+    /**
+     *  The winning combinations of the game
+     */
+    const winningCombos = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    /**
+     *
+     * @returns the winner of the game or null if there is no winner
+     */
+    const checkWinner = () => {
+      if (winner) return;
+      let whoWon = null;
+      winningCombos.forEach((combo) => {
+        const [a, b, c] = combo;
+        if (board[a] === board[b] && board[b] === board[c] && board[a] !== "") {
+          whoWon = board[a];
+        }
+      });
+      return whoWon
+        ? setWinner(whoWon)
+        : board.includes("")
+        ? setWinner(null)
+        : setWinner("Draw");
+    };
+
+    checkWinner();
+  }, [board, winner]);
+
   return (
-    <div className=" bg-neutral-100 h-screen mx-auto flex flex-col justify-center items-center">
-      <div className="bg-indigo-400 font-bold font-8xl mx-auto w-[30vw] h-[30vh] shadow-xl grid grid-cols-3  relative">
+    <div className=" bg-neutral-900 h-screen mx-auto flex flex-col justify-center items-center">
+      <div className="bg-indigo-200 font-bold mx-auto w-[15rem] h-[15rem] shadow-xl grid grid-cols-3  relative">
         {board.map((item, index) => (
           <div
             key={index}
-            className="h-[10vh] flex justify-center items-center cursor-pointer border-2 border-blue-600 hover:bg-yellow-300"
+            className="h-[5rem] flex justify-center items-center cursor-pointer hover:bg-zinc-400 hover:bg-opacity-60 shadow-4xl outline outline-2 outline-blue-500"
             onClick={() => handleBoxSelect(index)}
           >
-            <h1 className="uppercase">{item}</h1>
+            <h1 className="uppercase font-finger-paint text-yellow-500  text-6xl ">
+              {item}
+            </h1>
           </div>
         ))}
         {winner && (
-          <div className="w-full h-full flex justify-center items-center absolute top-0 left-0 border-2 bg-white bg-opacity-50 ">
-            <h1 className="text-6xl font-bold">{winner} won</h1>
+          <div
+            className="w-full h-full flex justify-center items-center absolute top-0 left-0 bg-white bg-opacity-50 z-2"
+            onClick={handleReset}
+          >
+            <h1 className="text-6xl font-bold">
+              {winner === "Draw" ? "draw" : `${winner}  won`}
+            </h1>
           </div>
         )}
       </div>
